@@ -6,7 +6,6 @@ from dataclasses import dataclass
 import win32gui
 import  win32api
 import ctypes
-from threading import Thread
 import sys
 
 sys.path.append(".")

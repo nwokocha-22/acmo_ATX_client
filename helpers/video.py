@@ -5,9 +5,12 @@ import numpy as np
 import pyautogui
 import queue
 import time
+from configparser import ConfigParser
 from helpers.loggers.errorlog import error_logger
 
 _BUFFER:int = 65536
+config = ConfigParser()
+config.read('amclient.ini')
 
 class SendVideo:
     """Captures and transmits the video frame via UDP socket
@@ -32,11 +35,14 @@ class SendVideo:
     IMAGE_QUALITY:
         Quality of transmitted image
     """
+
+    queue = queue.Queue()
+    frame_height = int(config['VIDEO']['frame.height'])
+    frame_width = int(config['VIDEO']['frame.width'])
+    IMAGE_QUALITY = int(config['VIDEO']['quality'])
+
     def __init__(self, ip, port, config):
         self.address = (ip, port)
-        self.queue = queue.Queue()
-        self.size = tuple(config['VIDEO']['frame.size'])
-        self.IMAGE_QUALITY = int(config['VIDEO']['quality'])
         self.trial =0
     
     def captureScreen(self):
@@ -57,14 +63,14 @@ class SendVideo:
             server through tcp socket.
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_udp:
-            sock_udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.BUFFER)
+            sock_udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, _BUFFER)
             while True:
                 try:
                     self.captureScreen()
                     video_frame = self.queue.get()
                     frame = np.array(video_frame)
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                    frame = cv2.resize(frame, (740, 480))
+                    frame = cv2.resize(frame, (self.frame_height, self.frame_width))
                     img_bytes = cv2.imencode(
                         '.jpg', 
                         frame, 
@@ -101,7 +107,6 @@ class SendVideo:
                                 try:
                                     sock_tcp.send(b"ready")
                                     data = sock_tcp.recv(1024).decode()
-                                    print("SERVER SAYS:", data)
                                     if data == "shoot":
                                         send_thread = Thread(target=self.send_data)
                                         send_thread.start()

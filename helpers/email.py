@@ -1,11 +1,8 @@
 import smtplib
-
 import ssl
-
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 from datetime import datetime
 
 class EmailClient:
@@ -94,7 +91,8 @@ class EmailClient:
         return html, plain
 
     def send_email(self, user:str, file_size:int, content:str, attachment=None) -> None:
-        """Sends the user's ip, copied file size, content, and attachment to the email address specified.
+        """Sends the user's ip, copied file size, content, and 
+        attachment to the email address specified.
     
         Parameters
         -----------

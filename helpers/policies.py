@@ -15,13 +15,19 @@ class CopyPolicy:
     Note
     --------
         - [0]. A new policy config file is created if it does not already exist.
-        - [1]. The loaded policy file is checked to see if the user has defaulted and the time the violation occured.
+        - [1]. The loaded policy file is checked to see if the user has defaulted 
+                and the time the violation occured.
         - [2]. If 24hrs has passed since violation, the restriction is relaxed.
         - [3]. If not the user is restricted from copying content to clipboard.
     """
 
     def has_defaulted(self) -> bool:
-        """ Returns True if the User has defaulted else false """
+        """Checks if the user has violated the copy policy
+        
+        Returns 
+        -------
+            True if the User has defaulted else false 
+        """
         policy = self.validate_policy()
         if policy['hasDefaulted']:
             return True
@@ -39,7 +45,8 @@ class CopyPolicy:
         Parameters
         ----------
         hasDefaulted: `bool`
-            Indicates if the copy policy has been violated. True if the copied content size is greater than 500kb else false.
+            Indicates if the copy policy has been violated. True if the copied content 
+            size is greater than 500kb else false.
 
         timeDefaulted: `Datetime.time`
             The time (timestamp) the policy was violated.
@@ -63,7 +70,9 @@ class CopyPolicy:
             error_logger.exception(err)
 
     def get_date_difference(self, d1:datetime, d2:datetime)-> datetime:
-        """Gets the difference between the current date (d2) and the date copy policy was violated (d1).
+        """Gets the difference between the current date (d2) and the date 
+        
+        copy policy was violated (d1).
 
         Parameter
         ----
@@ -88,10 +97,11 @@ class CopyPolicy:
 
         Note
         ----     
-            -[0]. When Script is started, checks if the current user has defaulted by copying file size more than.
-                  500kb in one hour, or 1500 in 24 hours. 
+            -[0]. When Script is started, checks if the current user has defaulted by copying 
+                  file size more than 500kb in one hour, or 1500 in 24 hours. 
             -[1]. If true, checks if it has been more than 24 hours.
-            -[2]. If more than 24 hours, enables the clipboard. If less, ensures the clipboard remain disabled.
+            -[2]. If more than 24 hours, enables the clipboard. If less, ensures the 
+                  clipboard remains disabled until next day.
         
         Returns
         -------
@@ -127,8 +137,10 @@ class CopyPolicy:
 
     def validate_policy(self) -> dict:
         """Loads the policy config file. Checks if policy has been violated.
-         If true, check the time elapsed since the violation occured. if elapsed time is more than 24 hours (1 day),
-        the copy policy is reset.
+
+         If true, check the time elapsed since the violation occured. 
+         if elapsed time is more than 24 hours (1 day),
+         the copy policy is reset.
         """
         _policy = self._loadPolicyConfig()
         policy = self.checkPolicyStatus(_policy)

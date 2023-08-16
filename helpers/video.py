@@ -80,9 +80,8 @@ class SendVideo:
 
     def connect_to_server(self):
         """Establishes a three-way handshake with the clients, 
-        and spawn a thread to send dat to the connect client
+        and spawn a thread to send dat to the connect client.
         """
-        print('connect to server started. address', self.address)
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock_tcp:
                 connected = False

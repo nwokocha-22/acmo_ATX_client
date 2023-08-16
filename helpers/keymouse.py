@@ -1,8 +1,8 @@
 
-from dataclasses import dataclass, field
+from dataclasses import field
 from pynput import keyboard, mouse
 from threading import Thread
-import time
+
 
 class MouseActivity:
 
@@ -23,7 +23,8 @@ class MouseActivity:
 
     def mouseMonitor(self):
         """Listens for mouse input. """
-        with mouse.Listener(on_click=self.on_click, on_move=self.on_move) as mouseMonitor:
+        with mouse.Listener(on_click=self.on_click, on_move=self.on_move) \
+            as mouseMonitor:
             mouseMonitor.join()
 
     def get_mouseMoveCount(cls):
@@ -53,7 +54,8 @@ class KeyboardActivity:
     
     def keyMonitor(self):
         """Listens for keyboard inputs. """
-        with keyboard.Listener(on_press= self.on_press, on_release=self.on_release) as keyMonitor:
+        with keyboard.Listener(on_press= self.on_press, on_release=self.on_release)\
+            as keyMonitor:
             keyMonitor.join()
 
     def get_keyStrokeCount(cls):

@@ -61,7 +61,10 @@ class ClipboardMonitor(CopyPolicy):
         wc.lpszClassName = self.__class__.__name__
         wc.hInstance = win32api.GetModuleHandle(None)
         class_atom = win32gui.RegisterClass(wc)
-        return win32gui.CreateWindow(class_atom, self.__class__.__name__, 0, 0, 0, 0, 0, 0, 0, wc.hInstance, None)
+        return win32gui.CreateWindow(
+            class_atom, 
+            self.__class__.__name__, 0, 0, 0, 0, 0, 0, 0, 
+            wc.hInstance, None)
     
     def _handler():
         pass
@@ -72,7 +75,11 @@ class ClipboardMonitor(CopyPolicy):
         ctypes.windll.user32.AddClipboardFormatListener(hwnd)
         win32gui.PumpMessages()
            
-    def _handle_message_from_clipboard(self, hwnd: int, msg: int, wparam: int, lparam: int):
+    def _handle_message_from_clipboard(self, 
+                                        hwnd: int, 
+                                        msg: int, 
+                                        wparam: int, 
+                                        lparam: int):
         WM_CLIPBOARDUPDATE = 0x031D
         if msg == WM_CLIPBOARDUPDATE:
             self._handle_clipboard_content()

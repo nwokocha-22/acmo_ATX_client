@@ -18,41 +18,41 @@ from helpers.loggers.activitylog import sockLogger
 class ClipboardMonitor(CopyPolicy):
     """Handles clipboard activities.
         
-        parameters
-        ----------
-        on_text: `function`
-            function to be called when the content type is text
-        on_image: `function`
-            function to be called when the content type is image
-        on_file:`function`
-            function to be called when the content type is file
+    Parameters
+    ----------
+    on_text: callable
+        Function to be called when the content type is text.
+    on_image: callable
+        Function to be called when the content type is image.
+    on_file: callable
+        Function to be called when the content type is file.
     """
     @dataclass
     class Content:
         """Copied content blue print.
         
-        Attributes
+        Parameters
         ----------
         type:
-            The type of content content copied [`Text` or `Image` or `File`]
+            The type of content content copied ['Text' or 'Image' or
+            'File'].
         value:
-            The actual content copied
+            The actual content copied.
         """
-
-        def __init__(self, type:str, value:Union[str, List[Path]]):
+        def __init__(self, type: str, value: Union[str, List[Path]]):
             self.type = type
             self.value = value
         
     def __init__(self, on_text=None, on_image=None, on_file=None):
-       
         self._on_text = on_text
         self._on_image = on_image
         self._on_files = on_file
         
     def _create_base_window(self) -> int:
-        """Creates a window for listening to clipboard
-        -----------
-        Returns: 
+        """Creates a window for listening to clipboard.
+
+        Returns
+        -------
             window hwnd
         """
         wc = win32gui.WNDCLASS()
@@ -85,7 +85,7 @@ class ClipboardMonitor(CopyPolicy):
         return 0
 
     def _handle_clipboard_content(self):
-        """Processes the clipboard content based on the file type. """
+        """Processes the clipboard content based on the file type."""
         try:
             content = self.getClipboardContent()
         except Exception as e:
@@ -93,31 +93,31 @@ class ClipboardMonitor(CopyPolicy):
             error_logger.exception(e)
         try:
             if content:
-                if content.type == 'text' and self._on_text:
+                if content.type == "text" and self._on_text:
                     self.copied_content = content.value
                     self._on_text(content.value)
 
                 elif content.type == "image" and self._on_image:
                     self._on_image(content.value)
-                    #: prevent copying of image(s)
+                    # prevent copying of image(s)
                     self.clearClipboard()
 
                 elif content.type == "files" and self._on_files:
                     self._on_files(content.value)
-                    #: prevent copying of file(s)
+                    # prevent copying of file(s)
                     self.clearClipboard()
             wc.CloseClipboard()
         except Exception as err:
             sockLogger.info("Unauthorized action. Copy Policy violated")
 
     def getClipboardContent(self) -> Optional[Content]:
-        """Checks the format of the copied content.
-        Gets and returns the recently copied content if the user has not defaulted   
+        """Checks the format of the copied content. Gets and returns
+        the recently copied content if the user has not defaulted.
 
-        Returns:
-            content: `ClipboardMonitor.Content`
-                The copied content  
-        ----------
+        Returns
+        -------
+        content: ClipboardMonitor.Content
+            The copied content.
         """
         try:
             wc.OpenClipboard()
@@ -146,7 +146,7 @@ class ClipboardMonitor(CopyPolicy):
                 wc.CloseClipboard()
 
     def disableClipboard(self):
-        """Empties and disables the clipboard. """
+        """Empties and disables the clipboard."""
         self.hasDefaulted = True
         self.clearClipboard()
 

@@ -22,19 +22,19 @@ __Author__="Maru Koch"
 """
 
 import sys
-sys.path.append('.') 
+sys.path.append('.')
 import helpers
 from helpers.video import SendVideo as Video
 from helpers.email import EmailClient as Email
 from helpers.loggers.activitylog import sockLogger
 from core import ActivityMonitor
 import multiprocessing
-import win32serviceutil  
+import win32serviceutil
 import win32serviceutil
 import win32event
 import servicemanager
 import socket
-import servicemanager  
+import servicemanager
 import configparser
 
 def main_app():
@@ -57,12 +57,14 @@ def main_app():
 
 class ActivityMonitorClientService(win32serviceutil.ServiceFramework):
     """
-        This script is the window service that starts and stops the core_app.exe client file
+    This script is the window service that starts and stops the
+    core_app.exe client file.
     """
 
     _svc_name_ = "AMClientService"
     _svc_display_name_ = "AM Client Service"
-    _svc_description_ = "Starts, stops, udpate, and removes the activity monitor client service"
+    _svc_description_ = "Starts, stops, udpate, and removes the activity \
+        monitor client service."
 
     def __init__(self, args):
         win32serviceutil.ServiceFramework.__init__(self, args)
@@ -94,7 +96,7 @@ if __name__ == "__main__":
     else:
         win32serviceutil.HandleCommandLine(ActivityMonitorClientService)
 
-#: COMMAND TO CONVERT TO EXECUTABLE
+# COMMAND TO CONVERT TO EXECUTABLE
 """
 pyinstaller.exe 
 --runtime-tmpdir=. 

@@ -8,12 +8,12 @@ import time
 from configparser import ConfigParser
 from helpers.loggers.errorlog import error_logger
 
-_BUFFER:int = 65536
+_BUFFER: int = 65536
 config = ConfigParser()
 config.read('amclient.ini')
 
 class SendVideo:
-    """Captures and transmits the video frame via UDP socket
+    """Captures and transmits the video frame via UDP socket.
 
     Parameters
     ----------
@@ -41,12 +41,12 @@ class SendVideo:
     frame_width = int(config['VIDEO']['frame.width'])
     IMAGE_QUALITY = int(config['VIDEO']['quality'])
 
-    def __init__(self, ip, port, config):
+    def __init__(self, ip, port):
         self.address = (ip, port)
         self.trial =0
     
     def captureScreen(self):
-        """Capture screen image and add it to queue. """
+        """Captures screen image and adds it to queue."""
         try:
             img = pyautogui.screenshot()
             self.queue.put(img)
@@ -58,9 +58,9 @@ class SendVideo:
             self.queue.put(img)  
 
     def send_data(self): 
-        """Create a window with the with title of the client ip.
-            captures the user's screen and sends the frame to a 
-            server through tcp socket.
+        """Create a window with the width title of the client ip.
+        Capture the user's screen and send the frame to a server
+        through tcp socket.
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock_udp:
             sock_udp.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, _BUFFER)
@@ -72,8 +72,8 @@ class SendVideo:
                     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                     frame = cv2.resize(frame, (self.frame_height, self.frame_width))
                     img_bytes = cv2.imencode(
-                        '.jpg', 
-                        frame, 
+                        '.jpg',
+                        frame,
                         [cv2.IMWRITE_JPEG_QUALITY, self.IMAGE_QUALITY])[1].tobytes()
                     sock_udp.sendto(img_bytes, self.address)
                     
@@ -85,8 +85,8 @@ class SendVideo:
                         self.trial += 1
 
     def connect_to_server(self):
-        """Establishes a three-way handshake with the clients, 
-        and spawn a thread to send dat to the connect client.
+        """Establishes a three-way handshake with the clients, and
+        spawns a thread to send data to the connected client.
         """
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock_tcp:
@@ -97,12 +97,12 @@ class SendVideo:
                             sock_tcp.connect(self.address)
                             connected = True
                         except Exception as error:
-                            error_logger.exception('Server not responding. \
-                                Trying to connect ... ')
+                            error_logger.exception("Server not responding. "
+                                "Trying to connect...")
                         time.sleep(10)
 
                         if connected:
-                            #: If connected to server, send data
+                            # If connected to server, send data.
                             while True: 
                                 try:
                                     sock_tcp.send(b"ready")
@@ -112,13 +112,13 @@ class SendVideo:
                                         send_thread.start()
                                         send_thread.join()
                                 except (ConnectionResetError, ConnectionAbortedError) as err:
-                                    #: If server is shut down or connection to server is terminated, 
-                                    # try to reconnect again
+                                    # If server is shut down or connection to server is terminated,
+                                    # try to reconnect again.
                                     error_logger.exception(err)
                                     connected = False
                                     break
                 except ConnectionAbortedError as err:
-                    error_logger.exception("Server not communicating. Trying to connect... ")
+                    error_logger.exception("Server not communicating. Trying to connect...")
         except ConnectionRefusedError as err:
             error_logger.exception(err)
                    

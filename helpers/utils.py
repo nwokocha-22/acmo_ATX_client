@@ -2,20 +2,22 @@ import os
 import zipfile
 from helpers.loggers.errorlog import error_logger
 
-def zip(files:list) -> tuple:
+def zip(files: list) -> tuple:
         """Gets the size of the copied file(s) and zips it.
     
-        parameter
-        ---------
-            files: `list`
-                Iterable containing the files to be zipped
+        Parameters
+        ----------
+        files: list
+            Iterable containing the files to be zipped.
         
-        Returns:
-            file_size: `int`
-                The total size of the zipped files
+        Returns
+        -------
+        tuple
+            file_size: int
+                The total size of the zipped files.
 
-            zipped: `zipfile.Zipped`
-                the zipped files
+            zipped: zipfile.Zipped
+                The zipped files.
         """
         file_size = 0
         zip = zipfile.ZipFile("copiedFiles.zip", "w")
@@ -23,7 +25,7 @@ def zip(files:list) -> tuple:
             for file in files:
                 if not os.path.islink(file):
                     size = os.path.getsize(file)
-                    file_size += round(size / 1000) #: converting byte to kilo byte
+                    file_size += round(size / 1000) # converting byte to kilobyte
                     zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
         except Exception as err:
             error_logger.exception(err)

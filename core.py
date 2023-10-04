@@ -47,6 +47,7 @@ class ActivityMonitor():
         self._time_in: datetime = None
         self._time_last_checked: datetime = None
         self._time_out: datetime = None
+
         #CONTENT
         self._copied_content_size: int = None
         self._copied_content: str = str()
@@ -74,20 +75,20 @@ class ActivityMonitor():
         """Starts the standalone threads."""
         self.clipboard = Clipboard(
             self._on_text, self._on_image, self._on_file)
-        # self.clipboard.reset() #Resets clipboard in development
+        self.clipboard.reset() #Resets clipboard in development
         clipboard_thread = Thread(
             target=self.clipboard.run_clipboard_listener)
         clipboard_thread.start()
         video_thread = Thread(target=self.video.connect_to_server)
         video_thread.start()
 
-        #: Log user mouse and keyboard activities every 10 minutes
+        #: Logs user mouse and keyboard activities every 10 minutes
         timer_thread = Thread(target=self._activityTimer, 
             args=(self.logUserActivities, self._LOG_INTERVAL, 'min',))
 
         timer_thread.start()
 
-        # check the policy status every 1 hour
+        # checks the policy status every 1 hour
         timer_hr_thread = Thread(
             target=self._policyTimer, 
             args=(self._checkPolicyStatus, 1, 'hour'))

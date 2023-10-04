@@ -11,23 +11,23 @@
     If the copy policy is violated, an email, which includes the IP address of the User's machine, 
     size of the file copied, the actual copied content, date and time, is sent to the chief administrator.
     
-    As a result of this violation, the user's clipboard will be disabled for 24hours even after rebooth
+    As a result of this violation, the user's clipboard will be disabled for 24hours even after reboot.
 
     --------------------
     TRANSMITION OF CAPTURED VIDEO
-    The captured video is transmitted to a remote server using a UDP socket
+    The captured video is transmitted to a remote server using a UDP socket.
 
     --------------------
     TRANSMITION OF LOG
     Logged user activity (Keyboard and mouse) is instantly transmitted to a remote server
-    via the Logger socket formmatter
+    via the Logger socket formatter.
 
     --------------------
     DEPENDED MODULES:
-        :videoClient: A module with a threaded class that captures the screen video frame in mpeg format
-        :keyMouseActivity: A module that logs the users activity every 10 minutes
-        :emailClient: A module that handles sending emails to a recipient email when the user defaults on the content copy policy
-        :ClipboardActivity: A module with a threaded class that monitors the clipboard. it fetches the content copied to clipboard so that its size can be estimated. 
+        :videoClient: A module with a threaded class that captures the screen video frame in mpeg format.
+        :keyMouseActivity: A module that logs the users activity every 10 minutes.
+        :emailClient: A module that handles sending emails to a recipient email when the user defaults on the content copy policy.
+        :ClipboardActivity: A module with a threaded class that monitors the clipboard. It fetches the content copied to clipboard so that its size can be estimated. 
 
 - # Running the Script
     `python ./core.py` 
@@ -35,8 +35,8 @@
 ## SETUP FOR DEVELOPMENT
 
 ### 1. Enviromental Varialbles (.env)
-- without the enviromental variable, starting the core.py module will fail
-- ensure you have .env file in your root directory and the  values for the IP (address of the server), PORT, PASSWORD, SENDER, RECEIVER are provided.
+- without the enviromental variable, starting the core.py module will fail.
+- ensure you have .env file in your root directory and the values for the IP (address of the server), PORT, PASSWORD, SENDER, RECEIVER are provided.
 - For the PASSWORD (Google App Authentication Key), you need to setup app authentication using google gmail settings. The PASSWORD Associated with the SENDER Email is required for the email functionality to work.
 
 ### 2. Google Email 2Auth Setup
@@ -46,26 +46,25 @@
 ## SCRIPT FEATURES AND FUNCTIONALITIES
 
 ### 1. Keyboard and Mouse Monitoring
--The KeyMouseActivity module monitors the user's keyboard and mouse activities. It captures the number of key strokes and mouse moves every 10 munites to indicate when a user is idle or active
+- The KeyMouseActivity module monitors the user's keyboard and mouse activities. It captures the number of key strokes and mouse moves every 10 munites to indicate when a user is idle or active.
 
 ### 2. Clipboard Monitoring
-- The clipboardActivity Module monitors the content copied to clipboard. also detects the type of content (text, image or file), and calls appropriate functions (on_text, on_image, and on_file) in the main application (core.py) for coresponding handling of the copied content.
+- The clipboardActivity Module monitors the content copied to clipboard. It also detects the type of content (text, image or file), and calls appropriate functions (on_text, on_image, and on_file) in the main application (core.py) for coresponding handling of the copied content.
 
-- the clipboard event handlers invokes a policy check to see if the copied content violates the copy policy or not. If not, it takes count of the size of the copied content. If it does, it invokes a deciplinary action which disables the clipbaord and updates the `policyConfig file` by setting the `hasDefaulted` key to True and appends the time the defaulting occurs. An email is sent to the Admin to inform him/her of the policy violation.
+- The clipboard event handlers invokes a policy check to see if the copied content violates the copy policy or not. If not, it takes count of the size of the copied content else, it invokes a disciplinary action which disables the clipboard and updates the `policyConfig` file by setting the `hasDefaulted` key to True and appends the time the defaulting occurs. An email is sent to the admin to inform him/her of the policy violation.
 
 ### 4. Video Monitoring
-- The VideoClient Module captures the User's screens and transmit the video to a remote server via an UDP Socket where it can be live streamed and also saved in a video file in a designated folder for future references. A new folder where the video is saved is created using the client's ip address if it does not already exist.
+- The VideoClient Module captures the user's screens and transmit the video to a remote server via an UDP socket where it can be live streamed and also saved in a video file in a designated folder for future references. A new folder where the video is saved is created using the client's ip address if it does not already exist.
 
 ### 5. Email Functionality
 - If the copy policy is violated by the user, an email is sent to the admin with details of the size of the copied content, the actual content, date and time, and the user's IP address.
 
 # LIBRARIES AND DEPENDENCIES
 - Refer to the requirement.txt for freezed dependencies
-- ensures that the right versions of libraries are installed as captured in the requirements.txt file.
-- if the right version of pyautogui and pillow is NOT used, you will run into errors when screenshot function of pyautogui is called. error => `pyscreeze.PyScreezeException: The Pillow package is required to use this function`
+- Ensure that the right versions of libraries are installed as captured in the requirements.txt file.
+- If the right version of pyautogui and pillow is NOT used, you will run into errors when screenshot function of pyautogui is called. error => `pyscreeze.PyScreezeException: The Pillow package is required to use this function`
 
 # PREPARING SCRIPT FOR DEPLOYMENT
-
 - House keeping: Ensure to remove all generated binary files that are not needed in running the script e.g error.log, .env, policyConfig, timeConf, copiedFiles.zip, requirement.txt, and others, including the test folder.
 
 - WARNING: The values for the parameters provided in the `.env` should be passed directly to the variable before conversion. Failure to do this will cause the script conversion to fail.
@@ -90,7 +89,7 @@
 # To REMOVE
 - dist/main_client.exe remove
 
-### WARNING: The Client scripts, if installed as a window service, will only work if the user is logged in not as an admin and 'allow service interact with desktop' is enabled. Pyautogui will fail to grab screen, and no video will be transmitted, if the two conditions stated above are not met.
+### WARNING: The Client scripts, if installed as a window service, will only work if the user is logged in, not as an admin, and 'allow service interact with desktop' is enabled. Pyautogui will fail to grab screen, and no video will be transmitted, if the two conditions stated above are not met.
 
 ### ENABLE SERVICE TO INTERACT WITH DESKTOP
 
@@ -107,7 +106,7 @@
 
 - STEP 1: 
 
-compile the script without the service. Ensure the `--noconsole` flag is used to avoid the popup of window shell when running the executable.
+Compile the script without the service. Ensure the `--noconsole` flag is used to avoid the popup of window shell when running the executable.
 
 -   `pyinstaller.exe --runtime-tmpdir=. --hidden-import win32timezone --collect-submodules helpers --hidden-import logging.handlers --hidden-import cv2 --name main_client --onefile --noconsole core.py`
 
@@ -117,14 +116,14 @@ compile the script without the service. Ensure the `--noconsole` flag is used to
 
 - STEP 2 - i : SET UP TASK IN TASK SCHEDULER
 
--   `General` : Name the scheduled task. ensure to select `Run only when user is logged on`
+-   `General`: Name the scheduled task. ensure to select `Run only when user is logged on`
 
--   `Triggers` : 
+-   `Triggers`: 
         `log`:    Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational, 
         `Source`: TerminalServices-RemoteConnectionManager
         `Event ID`: 1149
 
--   `Actions` : C:\atmo_client\dist\monitor.bat
+-   `Actions`: C:\atmo_client\dist\monitor.bat
 
 # NOTE: You may specify a different path to where the executable file is saved
 

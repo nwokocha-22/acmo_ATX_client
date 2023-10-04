@@ -13,7 +13,6 @@ class Timex():
     @property
     def params(cls):
         """Retrieves the login time. """
-
         if os.path.exists('timeConf'):
             with open('timeConf', 'rb') as time_:
                 time_dict = pickle.load(time_)
@@ -26,45 +25,61 @@ class Timex():
         return cls.params
 
     def update_params(cls, **kwargs):
-        """Updates the configuration file with the keywords args. 
-           opens the time configuration file, if it exists, for reading and writing
+        """Updates the configuration file with the keyword args.
+
+        Opens the time configuration file, if it exists, for reading
+        and writing.
         """
 
-        if os.path.exists("timeConf"):
-            with open('timeConf', 'rb+') as time_:
-                time_dict = pickle.load(time_)
-                time_.seek(0)
-                new_dict = {k:v for k, v in kwargs.items() if k in time_dict.keys()}
-                time_dict.update(new_dict)
-                pickle.dump(time_dict, time_)
+        try:
+            if os.path.exists("timeConf"):
+                with open('timeConf', 'rb+') as time_:
+                    time_dict = pickle.load(time_)
+                    time_.seek(0)
+                    new_dict = {k:v for k, v in kwargs.items() if k in time_dict.keys()}
+                    time_dict.update(new_dict)
+                    pickle.dump(time_dict, time_)
+            else:
+                # Create the config if it doesn't exist
+                with open('timeConf', 'wb') as time_:
+                    time_dict = {
+                        'date': datetime.now().date(), 
+                        'time_in': time.time(), 
+                        'last_checked': None, 
+                        'content_size_1hr': 0, 
+                        'content_size_24hr': 0}
+                    pickle.dump(time_dict, time_)
+        except FileExistsError as err:
+            print(err)
+        
 
     @staticmethod
-    def save_time_in(time_dict:dict={}):
+    def save_time_in(time_dict: dict = {}):
         """Saves the date and time user logs in.
         
         Parameters
         ----------
         time_dict: `dict`
-            :date:
+            date:
                 the current date
-            :time_in: 
+            time_in: 
                 the time user logged in/started working in the current day
-            :last_checked: 
+            last_checked: 
                 the last time the user copied content
-            :content_size_1hr: 
+            content_size_1hr: 
                 the size of content copied in the current time frame less than 1 hour
-            :content_size_24hr: 
+            content_size_24hr: 
                 the size of content copied in less than 24 hrs
         """
         try:
             with open('timeConf', 'wb') as time_:
                 if not time_dict:
                     time_dict = {
-                        'date':datetime.now().date(), 
-                        'time_in':time.time(), 
-                        'last_checked':None, 
-                        'content_size_1hr':0, 
-                        'content_size_24hr':0}
+                        'date': datetime.now().date(), 
+                        'time_in': time.time(), 
+                        'last_checked': None, 
+                        'content_size_1hr': 0, 
+                        'content_size_24hr': 0}
                 pickle.dump(time_dict, time_)
         except FileExistsError as err:
             print(err)
@@ -72,7 +87,7 @@ class Timex():
             return time_dict
 
     def get_config_params(cls):
-        """The time user began working for the day. """
+        """The time user began working for the day."""
         try:
             _params = cls.get_params
             if _params is not None and _params['date'] == datetime.now().date():
@@ -85,7 +100,9 @@ class Timex():
     
     @classmethod
     def interval(cls, t2:datetime, t1:datetime):
-        """Estimates the time difference from time-in until present in hour. """
+        """Evaluates the time difference from time-in until present in
+        hour.
+        """
         try:
             d2 = datetime.fromtimestamp(t2)
             d1 = datetime.fromtimestamp(t1)
@@ -97,15 +114,15 @@ class Timex():
 
 
 class _Timer(threading.Thread):
-    """This thread blocks for the interval specified and set the threading.
-       Event when the time elapses
+    """This thread blocks for the interval specified and set the threading
+    event when the time elapses.
 
     Parameters
     ----------
-    interval: `int`
+    interval: int
         The number of seconds/minutes/hours to block before timing out.
     
-    mode:   `str`
+    mode: str
         Time unit of measurement. Either seconds, minutes,or hours
     """
   
@@ -169,11 +186,15 @@ def timer(func):
     def _timer(callback, interval, mode):
         """A decorator function that calls the function after 
         the interval elapses
-        -------------
-        parameter:
-            :callback: the function to be called
-            :interval: the specified interval
-            :mode: the time frame -> sec, min or hour
+        
+        Parameters
+        ----------
+        callback:
+            The function to be called.
+        interval
+            The specified interval.
+        mode
+            The time frame -> sec, min or hour.
         """
        
         _time = _Timer(interval)

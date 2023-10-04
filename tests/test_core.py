@@ -1,8 +1,6 @@
 # test
 
 import pytest
-import sys
-from decouple import config
 import time
 from datetime import date, datetime
 from helpers.timer import timer

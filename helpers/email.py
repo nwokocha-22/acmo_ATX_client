@@ -8,19 +8,19 @@ from datetime import datetime
 class EmailClient:
     """Sends email from the sender to the receiver.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     password: `str `
-        the authentication key for a google email address
+        The authentication key for a google email address.
     sender: `str`
-        the email address associated with the specified authentication key (password)
+        The email address associated with the specified authentication key (password).
     receiver: `str`
-        The email address to which the email is sent
+        The email address to which the email is sent.
     
     Attributes
     ----------
     message_template: 
-        generates the html template used in the email message
+        Generates the html template used in the email message.
 
     >>> message_template(user, file_size, content)
 
@@ -31,7 +31,6 @@ class EmailClient:
 
     """
     def __init__(self, password, sender, receiver) -> None:
-
         self.password = password
         self.sender = sender
         self.receiver = receiver
@@ -44,15 +43,15 @@ class EmailClient:
         depending on the receiver's email client compatibility.
         
         Parameters
-        ---------------
-        user : `str`
-            The IP Address of the client 
+        ----------
+        user: `str`
+            The IP Address of the client.
         file_size: `int`
-            Size of the copied file
+            Size of the copied file.
         content: `str`
 
         Returns
-        --------
+        -------
         html: HTML message format
         plain: string/plain message format
         """
@@ -90,18 +89,19 @@ class EmailClient:
 
         return html, plain
 
-    def send_email(self, user:str, file_size:int, content:str, attachment=None) -> None:
+    def send_email(self, user: str, file_size: int, content: str,
+            attachment=None) -> None:
         """Sends the user's ip, copied file size, content, and 
         attachment to the email address specified.
     
         Parameters
-        -----------
+        ----------
         user: `str`
             IP address of the user's machine
         file_size: `int`
             Size of the file copied
         content: `str`
-            The actual content of the file (str). only applicable to text
+            The actual content of the file (str). Only applicable to text.
         attachment: `bytes`
             The file (byte) or image copied 
         """

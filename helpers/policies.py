@@ -12,7 +12,7 @@ class CopyPolicy:
     """The copy Policy loads the user's Policy. 
 
     Note
-    --------
+    ----
         - [0]. A new policy config file is created if it does not already exist.
         - [1]. The loaded policy file is checked to see if the user has defaulted 
                 and the time the violation occured.
@@ -21,10 +21,11 @@ class CopyPolicy:
     """
 
     def has_defaulted(self) -> bool:
-        """Checks if the user has violated the copy policy
+        """Checks if the user has violated the copy policy.
         
         Returns 
         -------
+        bool
             True if the User has defaulted else false 
         """
         policy = self.validate_policy()
@@ -32,21 +33,21 @@ class CopyPolicy:
             return True
         return False
 
-    def save_policy(self, policy:dict) -> None:
-        """ Saves copy policy in the root directory """
-
+    def save_policy(self, policy: dict) -> None:
+        """Saves copy policy in the root directory."""
         with open('policyConfig', 'wb') as config:
             pickle.dump(policy, config)
 
-    def updatePolicy(self, hasDefaulted:bool=False, timeDefaulted:datetime=None) -> dict:
+    def updatePolicy(self, hasDefaulted: bool = False,
+            timeDefaulted: datetime = None
+    ) -> dict:
         """Updates the loaded copy policy.
 
         Parameters
         ----------
         hasDefaulted: `bool`
-            Indicates if the copy policy has been violated. True if the copied content 
-            size is greater than 500kb else false.
-
+            Indicates if the copy policy has been violated. True if the
+            copied content size is greater than 500kb else false.
         timeDefaulted: `Datetime.time`
             The time (timestamp) the policy was violated.
         """
@@ -60,27 +61,28 @@ class CopyPolicy:
         return policy
 
     def _createPolicyConfig(self)->None:
-        """Creates and saves the policyConfig file. """
-        config = {"hasDefaulted":False, "timeDefaulted":None}
+        """Creates and saves the policyConfig file."""
+        config = {"hasDefaulted": False, "timeDefaulted": None}
         try:
             with open('policyConfig', 'xb') as logConfig:
                 pickle.dump(config, logConfig)
         except FileExistsError as err:
             error_logger.exception(err)
 
-    def get_date_difference(self, d1:datetime, d2:datetime)-> datetime:
-        """Gets the difference between the current date (d2) and the date 
-        
-        copy policy was violated (d1).
+    def get_date_difference(self, d1: datetime, d2: datetime)-> datetime:
+        """Gets the difference between the current date (d2) and the
+        date copy policy was violated (d1).
 
-        Parameter
-        ----
+        Parameters
+        ----------
         d1: `Datetime.timestamp`
         d2: `Datetime.timestamp`
 
-        Returns:
+        Returns
         -------
-        Datetime.timedelta object representing the number of days since the violation occurred.
+        Datetime.timedelta
+            Object representing the number of days since the violation
+            occurred.
         """
         d1 = datetime.strptime(d1, "%Y-%m-%d")
         d2 = datetime.strptime(d2, "%Y-%m-%d")
@@ -91,21 +93,23 @@ class CopyPolicy:
 
         Parameter:
         ---------
-            policyConfig : `dict`
-                Dictionary containing the status of the copy policy.
+        policyConfig : `dict`
+            Dictionary containing the status of the copy policy.
 
         Note
         ----     
-            -[0]. When Script is started, checks if the current user has defaulted by copying 
-                  file size more than 500kb in one hour, or 1500 in 24 hours. 
-            -[1]. If true, checks if it has been more than 24 hours.
-            -[2]. If more than 24 hours, enables the clipboard. If less, ensures the 
-                  clipboard remains disabled until next day.
+        -[0]. When Script is started, checks if the current user has
+            defaulted by copying file size more than 500kb in one hour,
+            or 1500 in 24 hours. 
+        -[1]. If true, checks if it has been more than 24 hours.
+        -[2]. If more than 24 hours, enables the clipboard. If less,
+            ensures the clipboard remains disabled until next day.
         
         Returns
         -------
-            policyConfig: `dict`
-                A dictionary containing a boolean value for whether the copy policy is still valid.
+        policyConfig: `dict`
+            A dictionary containing a boolean value for whether the
+            copy policy is still valid.
         """
         if policyConfig["hasDefaulted"]:
             default_time = policyConfig["timeDefaulted"]
@@ -124,8 +128,7 @@ class CopyPolicy:
                 
 
     def _loadPolicyConfig(self) -> dict:
-        """Loads the policy config for writing. """
-
+        """Loads the policy config for writing."""
         if not Path("policyConfig").exists():
             self._createPolicyConfig()
 
@@ -135,18 +138,19 @@ class CopyPolicy:
         return policy_config
 
     def validate_policy(self) -> dict:
-        """Loads the policy config file. Checks if policy has been violated.
+        """Loads the policy config file. Checks if policy has been
+        violated.
 
-         If true, check the time elapsed since the violation occured. 
-         if elapsed time is more than 24 hours (1 day),
-         the copy policy is reset.
+        If true, check the time elapsed since the violation occured. If
+        elapsed time is more than 24 hours (1 day), the copy policy is
+        reset.
         """
         _policy = self._loadPolicyConfig()
         policy = self.checkPolicyStatus(_policy)
         return policy
 
     def reset(self):
-        """Resets the policy. """
+        """Resets the policy."""
         self.updatePolicy(hasDefaulted=False, timeDefaulted=None)
 
 

@@ -30,28 +30,28 @@ class Timex():
         Opens the time configuration file, if it exists, for reading
         and writing.
         """
-        time_dict = None
+
         try:
             if os.path.exists("timeConf"):
                 with open('timeConf', 'rb+') as time_:
                     time_dict = pickle.load(time_)
                     time_.seek(0)
+                    new_dict = {k:v for k, v in kwargs.items() if k in time_dict.keys()}
+                    time_dict.update(new_dict)
+                    pickle.dump(time_dict, time_)
             else:
                 # Create the config if it doesn't exist
                 with open('timeConf', 'wb') as time_:
-                    if not time_dict:
-                        time_dict = {
-                            'date': datetime.now().date(), 
-                            'time_in': time.time(), 
-                            'last_checked': None, 
-                            'content_size_1hr': 0, 
-                            'content_size_24hr': 0}
+                    time_dict = {
+                        'date': datetime.now().date(), 
+                        'time_in': time.time(), 
+                        'last_checked': None, 
+                        'content_size_1hr': 0, 
+                        'content_size_24hr': 0}
+                    pickle.dump(time_dict, time_)
         except FileExistsError as err:
             print(err)
-        finally:
-            new_dict = {k:v for k, v in kwargs.items() if k in time_dict.keys()}
-            time_dict.update(new_dict)
-            pickle.dump(time_dict, time_)
+        
 
     @staticmethod
     def save_time_in(time_dict: dict = {}):

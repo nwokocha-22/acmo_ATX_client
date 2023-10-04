@@ -389,7 +389,7 @@ if __name__=="__main__":
         PASSWORD= config["EMAIL"]["email_host_password"]
         RECEIVER = config["EMAIL"]["admin_email"]
 
-        video = Video(IP, PORT, config)
+        video = Video(IP, PORT)
         email = Email(PASSWORD, SENDER, RECEIVER)
         ActivityMonitor(video, email, config)
 

@@ -46,7 +46,7 @@ class SendVideo:
         self.trial =0
     
     def captureScreen(self):
-        """Captures screen image and adds it to queue."""
+        """Captures screen image and adds it to queue. """
         try:
             img = pyautogui.screenshot()
             self.queue.put(img)
@@ -117,6 +117,7 @@ class SendVideo:
                                     error_logger.exception(err)
                                     connected = False
                                     break
+                                
                 except ConnectionAbortedError as err:
                     error_logger.exception("Server not communicating. Trying to connect...")
         except ConnectionRefusedError as err:

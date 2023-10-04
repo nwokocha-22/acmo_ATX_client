@@ -12,7 +12,7 @@ class Timex():
 
     @property
     def params(cls):
-        """Retrieves the login time."""
+        """Retrieves the login time. """
         if os.path.exists('timeConf'):
             with open('timeConf', 'rb') as time_:
                 time_dict = pickle.load(time_)
@@ -37,6 +37,7 @@ class Timex():
                     time_dict = pickle.load(time_)
                     time_.seek(0)
             else:
+                # Create the config if it doesn't exist
                 with open('timeConf', 'wb') as time_:
                     if not time_dict:
                         time_dict = {
@@ -58,16 +59,16 @@ class Timex():
         
         Parameters
         ----------
-        time_dict: dict
-            :date:
+        time_dict: `dict`
+            date:
                 the current date
-            :time_in: 
+            time_in: 
                 the time user logged in/started working in the current day
-            :last_checked: 
+            last_checked: 
                 the last time the user copied content
-            :content_size_1hr: 
+            content_size_1hr: 
                 the size of content copied in the current time frame less than 1 hour
-            :content_size_24hr: 
+            content_size_24hr: 
                 the size of content copied in less than 24 hrs
         """
         try:

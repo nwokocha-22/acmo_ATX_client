@@ -30,7 +30,6 @@ class Timex():
         Opens the time configuration file, if it exists, for reading
         and writing.
         """
-
         try:
             if os.path.exists("timeConf"):
                 with open('timeConf', 'rb+') as time_:

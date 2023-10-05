@@ -10,8 +10,9 @@ class MouseActivity:
     _mouse_move_count: int = 0
     
     def __init__(self) -> None:
-        m = Thread(target=self.mouseMonitor)
-        m.start()
+        self.m = Thread(target=self.mouseMonitor)
+        self.m.daemon = True
+        self.m.start()
         
     @staticmethod
     def on_click(x, y, button, pressed):
@@ -32,6 +33,9 @@ class MouseActivity:
 
     def reset(cls):
         cls._mouse_move_count = 0
+
+    def stop(self, timeout):
+        self.m.join(timeout)
     
 
 class KeyboardActivity: 
@@ -40,8 +44,9 @@ class KeyboardActivity:
     _key_stroke_count: int = 0
     
     def __init__(self):
-        k = Thread(target=self.keyMonitor)
-        k.start()
+        self.k = Thread(target=self.keyMonitor)
+        self.k.daemon = True
+        self.k.start()
 
     @staticmethod
     def on_press(key):
@@ -64,6 +69,8 @@ class KeyboardActivity:
     def reset(cls):
         cls._key_stroke_count = 0
 
+    def stop(self, timeout):
+        self.k.join(timeout)
 
 class KeyMouseMonitor(Thread):
     def __init__(self, **kwargs):

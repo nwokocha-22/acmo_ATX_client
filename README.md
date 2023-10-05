@@ -123,8 +123,9 @@ Compile the script without the service. Ensure the `--noconsole` flag is used to
         `Source`: TerminalServices-RemoteConnectionManager
         `Event ID`: 1149
 
--   `Actions`: C:\atmo_client\dist\monitor.bat
+-   `Actions`: C:\atmo_client\dist\monitor.bat (windows)
 
+-   `Actions`: /home/atmo_client/dist/monitor.bat (linux)
 # NOTE: You may specify a different path to where the executable file is saved
 
 - monitor.bat is the batch script that is triggered when there is a logon event. The batch script starts the executable file which runs in the background

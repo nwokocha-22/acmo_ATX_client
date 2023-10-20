@@ -35,7 +35,10 @@ class Timex():
                 with open('timeConf', 'rb+') as time_:
                     time_dict = pickle.load(time_)
                     time_.seek(0)
-                    new_dict = {k:v for k, v in kwargs.items() if k in time_dict.keys()}
+                    new_dict = {k:v for k, v in kwargs.items() \
+                        if k in time_dict.keys()
+                    }
+                    print(new_dict)
                     time_dict.update(new_dict)
                     pickle.dump(time_dict, time_)
             else:

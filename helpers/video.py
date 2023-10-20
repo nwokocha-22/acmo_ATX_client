@@ -5,6 +5,7 @@ import numpy as np
 import pyautogui
 import queue
 import time
+import pickle
 from configparser import ConfigParser
 from helpers.loggers.errorlog import error_logger
 
@@ -17,36 +18,41 @@ class SendVideo:
 
     Parameters
     ----------
-    ip: `str`
+    ip: str
         IP address of the receiver device (server)
-    port: `int`
+    port: int
         Port number on which to send data from sender side
-    config: `configParser.ConfigParser`
-        Video configurations
 
     Attributes
     ----------
-    address: `tuple`
-        2-element tuple containing server's IPv4 address, port number for sending datagrams,
-    queue: `queue.Queue`
-        Queue object used by thread to store frames received from screen capturing
-    size: `stuple`
-        Video frame resolution
+    address: tuple
+        2-element tuple containing server's IPv4 address and port
+        number for sending datagrams.
+    queue: queue.Queue
+        Queue object used by thread to store frames received from
+        screen capturing.
+    size: tuple
+        Video frame resolution.
     IMAGE_QUALITY:
-        Quality of transmitted image
+        Quality of transmitted image.
     """
 
     queue = queue.Queue()
+    # try:
+    #     width, height = pyautogui.size()
+    #     frame_width = height
+    #     frame_height = width
+    # except Exception:
     frame_height = int(config['VIDEO']['frame.height'])
     frame_width = int(config['VIDEO']['frame.width'])
     IMAGE_QUALITY = int(config['VIDEO']['quality'])
 
     def __init__(self, ip, port):
         self.address = (ip, port)
-        self.trial =0
+        self.trial = 0
     
     def captureScreen(self):
-        """Captures screen image and adds it to queue. """
+        """Captures screen image and adds it to queue."""
         try:
             img = pyautogui.screenshot()
             self.queue.put(img)
@@ -55,7 +61,7 @@ class SendVideo:
             time.sleep(1)
             error_logger.exception(err)  
             img = pyautogui.screenshot()
-            self.queue.put(img)  
+            self.queue.put(img)
 
     def send_data(self): 
         """Create a window with the width title of the client ip.
@@ -103,14 +109,22 @@ class SendVideo:
 
                         if connected:
                             # If connected to server, send data.
-                            while True: 
+                            while True:
                                 try:
                                     sock_tcp.send(b"ready")
+                                    # data = ["ready", self.frame_height, self.width]
+                                    # to_send = pickle.dumps(data)
+                                    # sock_tcp.sendall(to_send)
                                     data = sock_tcp.recv(1024).decode()
                                     if data == "shoot":
                                         send_thread = Thread(target=self.send_data)
                                         send_thread.start()
-                                        send_thread.join()
+                                        # send_thread.join()
+                                    while True:
+                                        sock_tcp.send(b"tick")
+                                        response = sock_tcp.recv(1024).decode()
+                                        if response != "tock":
+                                            raise ConnectionResetError()
                                 except (ConnectionResetError, ConnectionAbortedError) as err:
                                     # If server is shut down or connection to server is terminated,
                                     # try to reconnect again.

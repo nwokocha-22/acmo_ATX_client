@@ -64,17 +64,17 @@ class EmailClient:
                          <p>
                             Date: {datetime.now().strftime("%d/%m/%Y, %H:%M:%S")}
                         </p>
-                        <h2>
+                        <h3>
                             File Size:
-                            <b><u><i>{file_size} KB</i></u></b>
-                        </h2>
-                        <h4>Copied Content</h4>
+                            <b><u>{file_size} KB</u></b>
+                        </h3>
+                        <h4>Copied Content:</h4>
                         <p>
                             {content}
                         </p>
                     </body>
                     <footer>
-                        <p><i>{datetime.now().year}</i></P>
+                        <p><i>Activity Monitor ({datetime.now().year})</i></p>
                     </footer>
                     </html>
                 """

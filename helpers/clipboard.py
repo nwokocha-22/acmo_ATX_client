@@ -74,11 +74,13 @@ class ClipboardMonitor(CopyPolicy):
         ctypes.windll.user32.AddClipboardFormatListener(hwnd)
         win32gui.PumpMessages()
            
-    def _handle_message_from_clipboard(self, 
-                                        hwnd: int, 
-                                        msg: int, 
-                                        wparam: int, 
-                                        lparam: int):
+    def _handle_message_from_clipboard(
+        self, 
+        hwnd: int, 
+        msg: int, 
+        wparam: int, 
+        lparam: int
+    ):
         WM_CLIPBOARDUPDATE = 0x031D
         if msg == WM_CLIPBOARDUPDATE:
             self._handle_clipboard_content()
@@ -106,9 +108,9 @@ class ClipboardMonitor(CopyPolicy):
                     self._on_files(content.value)
                     # prevent copying of file(s)
                     self.clearClipboard()
-            wc.CloseClipboard()
+            # wc.CloseClipboard()
         except Exception as err:
-            sockLogger.info("Unauthorized action. Copy Policy violated")
+            error_logger.exception(err)
 
     def getClipboardContent(self) -> Optional[Content]:
         """Checks the format of the copied content. Gets and returns
@@ -129,21 +131,24 @@ class ClipboardMonitor(CopyPolicy):
                         wc.EmptyClipboard()
                 return ''
 
-            #: Check the format of the copied content (text, image, or **byte)
-            if text:= checkFormat(wc.CF_UNICODETEXT):
+            # Check the format of the copied content
+            # (text, image, or **byte)
+            if text := checkFormat(wc.CF_UNICODETEXT):
                 return ClipboardMonitor.Content('text', text)
                 
-            elif image:= checkFormat(wc.CF_BITMAP):
+            elif image := checkFormat(wc.CF_BITMAP):
                 return ClipboardMonitor.Content('image', image)
             
-            elif files:= checkFormat(wc.CF_HDROP):
-                return ClipboardMonitor.Content('files', [Path(file) for file in files])
+            elif files := checkFormat(wc.CF_HDROP):
+                return ClipboardMonitor.Content(
+                    'files', [Path(file) for file in files]
+                )
 
             return None
             
         finally:
-            if self.has_defaulted():
-                wc.CloseClipboard()
+            # if self.has_defaulted():
+            wc.CloseClipboard()
 
     def disableClipboard(self):
         """Empties and disables the clipboard."""

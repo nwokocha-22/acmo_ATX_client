@@ -49,9 +49,9 @@ class ActivityMonitor():
         self._time_out: datetime = None
 
         #CONTENT
-        self._copied_content_size: int = None
+        self._copied_content_size: int = 0
         self._copied_content: str = str()
-        self._copied_content_size_24hr: int = None
+        self._copied_content_size_24hr: int = 0
         self._copied_content_24hr: str = str()
         
         self.start()
@@ -65,9 +65,12 @@ class ActivityMonitor():
         self._copied_content_size_24hr = params['content_size_24hr']
         self._time_last_checked = params['last_checked']
         self._LOG_INTERVAL = int(self.config['POLICY']['log_interval'])
-        self._CHECK_STATUS_INTERVAL = int(self.config['POLICY']['check_status_interval'])
-        self._copied_content_limit = self.config['POLICY']['copied_content_limit']
-        self._copied_content_limit_24hrs = self.config['POLICY']['copied_content_limit_24hrs']
+        self._CHECK_STATUS_INTERVAL = \
+            int(self.config['POLICY']['check_status_interval'])
+        self._copied_content_limit = \
+            int(self.config['POLICY']['copied_content_limit'])
+        self._copied_content_limit_24hrs = \
+            int(self.config['POLICY']['copied_content_limit_24hrs'])
     
         self.start_lone_threads()
 
@@ -177,7 +180,9 @@ class ActivityMonitor():
                 elif (interval > 1 and interval < 24) and limit_exceeded_24hr:
                     self.invokeDisciplinaryAction(file_size, file, file_type)
                 else:
-                    self.update_copied_content(content=file, size=file_size, level=0)
+                    self.update_copied_content(
+                        content=file, size=file_size, level=0
+                    )
 
     # function is never used
     def clear_copied_content(self, level: int = 0):
@@ -294,11 +299,12 @@ class ActivityMonitor():
     def invokeDisciplinaryAction(self, file_size, file, file_type):
         """Invokes displinary Action.
 
-        This is called when the copy policy is violiated. It sets the
+        This is called when the copy policy is violated. It sets the
         user's `hasDefaulted` status to True, sets the time of
         violation, and triggers the function to disable clipboard for
         24hours.
         """
+        sockLogger.info("Unauthorized action. Copy Policy violated")
         client_ip = socket.gethostbyname(socket.gethostname())
         if file_type == "text":
             self.email.send_email(client_ip, file_size, file)
@@ -384,10 +390,11 @@ if __name__=="__main__":
         config = configparser.ConfigParser()
         config.read('amclient.ini')
 
-        IP = socket.gethostbyname(socket.gethostname())
-        PORT = int(config["DEFAULT"]['port'])
+        # IP = socket.gethostbyname(socket.gethostname())
+        IP = config["DEFAULT"]["server_ip"]
+        PORT = int(config["DEFAULT"]["port"])
         SENDER = config["EMAIL"]["email_host_user"]
-        PASSWORD= config["EMAIL"]["email_host_password"]
+        PASSWORD = config["EMAIL"]["email_host_password"]
         RECEIVER = config["EMAIL"]["admin_email"]
 
         video = Video(IP, PORT)

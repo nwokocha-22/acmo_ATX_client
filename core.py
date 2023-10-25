@@ -7,6 +7,11 @@ import sys
 import io
 import time
 import socket
+import tkinter
+import win32api
+import win32con
+import pywintypes
+import pyautogui
 from typing import Callable
 from threading import Thread
 from datetime import datetime
@@ -387,6 +392,39 @@ class ActivityMonitor():
             \x00\x00\x00\x00\x00\x5b\xe0\x00\x00\x5c\xe0\x00\x00\x00\x00')
         
 if __name__=="__main__":
+    def display_message(message: str):
+        """
+        Create "uninteractable" text label overlay.
+
+        Paramters:
+        message: str
+            String to display as message over desktop.
+        """
+        message = message.replace("\n", " ")
+        label = tkinter.Label(
+            text=message, font=("Times New Roman", 10),
+            fg="orange", bg="white"
+        )
+        label.master.overrideredirect(True)
+        # get width of screen
+        width, _ = pyautogui.size()
+        label.master.geometry(f"+{width//16}+0")
+        label.master.lift()
+        label.master.wm_attributes("-topmost", True)
+        label.master.wm_attributes("-disabled", True)
+        label.master.wm_attributes("-transparentcolor", "white")
+
+        hWindow = pywintypes.HANDLE(int(label.master.frame(), 16))
+        exStyle = win32con.WS_EX_COMPOSITED | win32con.WS_EX_LAYERED | \
+            win32con.WS_EX_NOACTIVATE | win32con.WS_EX_TOPMOST | \
+                win32con.WS_EX_TRANSPARENT
+        win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
+
+        label.pack()
+        # label.update_idletasks()
+        # label.update()
+        label.mainloop()
+
     def main():
         from helpers.loggers.activitylog import sockLogger
         import configparser
@@ -400,6 +438,10 @@ if __name__=="__main__":
         SENDER = config["EMAIL"]["email_host_user"]
         PASSWORD = config["EMAIL"]["email_host_password"]
         RECEIVER = config["EMAIL"]["admin_email"]
+        MESSAGE = config["POLICY"]["message"]
+
+        tlabel = Thread(target=display_message, args=(MESSAGE,))
+        tlabel.start()
 
         video = Video(IP, PORT)
         email = Email(PASSWORD, SENDER, RECEIVER)

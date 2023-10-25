@@ -78,7 +78,8 @@ class ActivityMonitor():
         """Starts the standalone threads."""
         self.clipboard = Clipboard(
             self._on_text, self._on_image, self._on_file)
-        self.clipboard.reset() #Resets clipboard in development
+        # Resets clipboard in development
+        # self.clipboard.reset()
         clipboard_thread = Thread(
             target=self.clipboard.run_clipboard_listener)
         clipboard_thread.start()
@@ -97,6 +98,9 @@ class ActivityMonitor():
             args=(self._checkPolicyStatus, 1, 'hour'))
 
         timer_hr_thread.start()
+        sockLogger.info(
+            f"{socket.gethostbyname(socket.gethostname())} started"
+        )
         clipboard_thread.join()
         video_thread.join() 
         timer_thread.join()

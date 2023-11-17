@@ -1,14 +1,18 @@
+import subprocess
 import socket
 import struct
-from threading import Thread
 import cv2
-import numpy as np
-import pyautogui
 import queue
 import time
 import pickle
+from threading import Thread
 from configparser import ConfigParser
+
+import numpy as np
+import pyautogui
+
 from helpers.loggers.errorlog import error_logger
+from helpers.email import EmailClient
 
 config = ConfigParser()
 config.read('amclient.ini')
@@ -65,6 +69,27 @@ class SendVideo:
             error_logger.exception(err)  
             img = pyautogui.screenshot()
             self.queue.put(img)
+    
+    def alertTermination(self, username):
+        """
+        Sends a message to notify that the user has been disconnected.
+
+        Parameters
+        ----------
+        username: str
+            Username of the client who was disconnected.
+        """
+        sender = config["EMAIL"]["email_host_user"]
+        password = config["EMAIL"]["email_host_password"]
+        receiver = config["EMAIL"]["admin_email"]
+        email = EmailClient(password, sender, receiver)
+
+        content = (f"The session of {username} has been terminated on the "
+            "server upon detecting that they are running a "
+            "screen-record/screenshot blocking software prohibiting the "
+            "function of the activity monitor.")
+        server = socket.gethostbyname(socket.gethostname())
+        email.send_email(server, 0, content, etype=2)
 
     def send_data(self, sock_tcp: socket.socket): 
         """Create a window with the width title of the client ip.
@@ -77,7 +102,32 @@ class SendVideo:
                 video_frame = self.queue.get()
                 frame = np.array(video_frame)
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                # frame = cv2.resize(frame, (self.frame_height, self.frame_width))
+                # frame = cv2.resize(
+                #     frame, (self.frame_height, self.frame_width)
+                # )
+
+                # If all pixels are black; this will denote the
+                # activity monitor inability to record the screen,
+                # indicating that there is possibly a screen record
+                # blocker being run on the server.
+                if not frame.any():
+                    # Terminate user session.
+                    ret = subprocess.run(
+                        "query session", stdout=subprocess.PIPE, text=True
+                    )
+                    data = ret.stdout.split("\n")
+                    for line in data:
+                        if line.startswith(">"):
+                            try:
+                                id = line.split()[2]
+                                name = line.split()[1]
+                                self.alertTermination(name)
+                                error_logger.info(
+                                    f"{name} session disconnected."
+                                )
+                                subprocess.run(f"tsdiscon {id}", text=True)
+                            except Exception as ex:
+                                error_logger.exception(ex)
                 img_bytes = cv2.imencode(
                     '.jpg',
                     frame,
@@ -133,7 +183,8 @@ class SendVideo:
                                 )
                                 send_thread.start()
                                 send_thread.join()
-                        except (ConnectionResetError, ConnectionAbortedError) as err:
+                        except (ConnectionResetError, ConnectionAbortedError)\
+                            as err:
                             # If server is shut down or connection to
                             # server is terminated, try to reconnect
                             # again.

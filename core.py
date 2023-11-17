@@ -146,7 +146,7 @@ class ActivityMonitor():
             The type of the copied data - can be "text", "file", or
             "image".
         """
-        message = (f"clipboard >>> copied file size: {file_size} KB, "
+        message = (f"clipboard >>> copied file size: {file_size} Bytes, "
             f"file type: {file_type}")
         sockLogger.info(message)
 
@@ -316,11 +316,11 @@ class ActivityMonitor():
         sockLogger.info("Unauthorized action. Copy Policy violated")
         client_ip = socket.gethostbyname(socket.gethostname())
         if file_type == "text":
-            self.email.send_email(client_ip, file_size, file)
+            self.email.send_email(client_ip, (file_size/1000), file)
         else:
             # send files as attachment if not text (i.e for bytes and
             # images)
-            self.email.send_email(client_ip, file_size,
+            self.email.send_email(client_ip, (file_size/1000),
                 "See attached zipped file(s)", file
             )
         if not self.clipboard.has_defaulted():

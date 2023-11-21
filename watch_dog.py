@@ -353,11 +353,11 @@ def receive_messages(conn: socket.socket):
         while True:
             message = conn.recv(1024).decode()
             if clientname not in connections: connections.append(clientname)
-            print("Connections:", connections)
-            print("Logins:", login)
-            print("Watch_screen:", message)
+            # print("Connections:", connections)
+            # print("Logins:", login)
+            # print("Watch_screen:", message)
             if clientname not in login.keys():
-                print("You got me!")
+                # print("You got me!")
                 continue
                 # Get event logs to find if clientname has logged in.
                 # logons = get_login_events()
@@ -419,7 +419,7 @@ def receive_messages(conn: socket.socket):
                 terminate_session(session_id)
                 alert(username=username, etype=3)
             del login[clientname]
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, Exception):
             pass
         return
     except Exception as ex:
@@ -433,7 +433,7 @@ def receive_messages(conn: socket.socket):
                 terminate_session(session_id)
                 alert(username=username, etype=2)
             del login[clientname]
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, Exception):
             pass
         return
 

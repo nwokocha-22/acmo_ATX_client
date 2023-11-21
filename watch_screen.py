@@ -31,6 +31,7 @@ def main():
                 resp = sock.recv(1024).decode()
                 if resp != "go on":
                     return
+                print("Good to go!")
                 while True:
                     # Get random position on screen.
                     left = random.randint(0, (width-50))

@@ -141,8 +141,8 @@ class SendVideo:
                 
             except OSError as os_err:
                 if self.trial >= 12:
-                    error_logger.info(f"{self.address[0]}: \
-                        Terminating screen capturing...")
+                    error_logger.info(f"{self.address[0]}: "
+                        "Terminating screen capturing...")
                     break
                 # time.sleep(5)
                 self.trial += 1

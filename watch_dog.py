@@ -233,10 +233,12 @@ def terminate_session(id: int):
         The session ID for the session to be terminated.
     """
     try:
-        obj = subprocess.run(f"tsdiscon {id}", text=True)
+        obj = subprocess.run(
+            f"tsdiscon {id}", stderr=subprocess.PIPE, text=True
+        )
         logger.info(f"Session {id} terminated")
         if obj.stderr:
-            logger.debug("terminate_session:", obj.stderr)
+            logger.debug(f"terminate_session: {obj.stderr}")
     except Exception as ex:
         logger.exception(ex)
 
@@ -257,10 +259,13 @@ def get_session_id(username: str) -> int:
     """
     id = None
     # Get all sessions.
-    obj = subprocess.run("query session", stdout=subprocess.PIPE, text=True)
+    obj = subprocess.run(
+        "query session", stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, text=True
+    )
     obj.stdout = obj.stdout.replace(">", "", 1)
     if obj.stderr:
-        logger.debug("get_session_id:", obj.stderr)
+        logger.debug(f"get_session_id: {obj.stderr}")
     data = obj.stdout.split("\n")[1:-1]
     data = [line.split() for line in data]
     for items in data:
@@ -278,10 +283,13 @@ def user_list() -> pd.DataFrame:
     pd.Dataframe
         Data frame containing data about all users who aren't admin.
     """
-    obj = subprocess.run("query user", stdout=subprocess.PIPE, text=True)
+    obj = subprocess.run(
+        "query user", stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, text=True
+    )
     obj.stdout = obj.stdout.replace(">", "", 1)
     if obj.stderr:
-        logger.debug("user_list:", obj.stderr)
+        logger.debug(f"user_list: {obj.stderr}")
     data = obj.stdout.split("\n")[1:-1]
     data = [line.split() for line in data]
     # Create a pandas data frame with the response.

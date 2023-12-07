@@ -438,7 +438,8 @@ if __name__=="__main__":
         SENDER = config["EMAIL"]["email_host_user"]
         PASSWORD = config["EMAIL"]["email_host_password"]
         RECEIVER = config["EMAIL"]["admin_email"]
-        MESSAGE = config["POLICY"]["message"]
+        MESSAGE = config["POLICY"]["message"] \
+            + f" - ({datetime.now().strftime('%d-%m-%Y %H:%M:%S')})"
 
         tlabel = Thread(target=display_message, args=(MESSAGE,))
         tlabel.start()

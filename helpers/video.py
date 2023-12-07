@@ -66,7 +66,7 @@ class SendVideo:
             time.sleep(0.3)
         except OSError as err:
             time.sleep(1)
-            error_logger.exception(err)  
+            error_logger.exception(err)
             img = pyautogui.screenshot()
             self.queue.put(img)
     

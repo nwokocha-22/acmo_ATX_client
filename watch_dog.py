@@ -34,7 +34,7 @@ file_logger.setFormatter(file_formater)
 logger.addHandler(file_logger)
 
 # Dictionary to keep track of logged in users
-login = {}
+login = {} # e.g. {'DESKTOP-Q5BFL4N': 'User1'}
 # List to track clients who are running watch_screen and have connected.
 connections = []
 
@@ -138,6 +138,16 @@ def template(user: str, scenario: int = 1) -> Tuple[str, str]:
                     watch_screen. \n
                 """
         ],
+        4: [
+                f"""
+                    <p>
+                        {user} has been remotely connected to sucessfully.
+                    </p>
+                """,
+                f"""
+                    \t {user} has been remotely connected to successfully. \n
+                """
+        ],
     }
     html = f"""\
                 <html>
@@ -165,7 +175,8 @@ def template(user: str, scenario: int = 1) -> Tuple[str, str]:
 def send_email(
         sender: str, password: str,
         receiver: str, username: str,
-        scenario: int = 1
+        scenario: int = 1,
+        subject=None,
     ):
     """
     Sends an email when a user session has been terminated for killing
@@ -187,7 +198,7 @@ def send_email(
     """
     ctx = ssl.create_default_context()
     message = MIMEMultipart("alternative")
-    message["Subject"] = "User Session Terminated"
+    message["Subject"] = subject if subject else "User Session Terminated"
     message["From"] = sender
     message["To"] = receiver
 
@@ -200,7 +211,7 @@ def send_email(
         server.login(sender, password)
         server.sendmail(sender, receiver, message.as_string())
 
-def alert(username: str, etype: int = 1):
+def alert(username: str, etype: int = 1, subject=None):
     """
     Prepare and send email about user whose session has been
     terminated.
@@ -218,7 +229,10 @@ def alert(username: str, etype: int = 1):
         password = config["EMAIL"]["email_host_password"]
         receiver = config["EMAIL"]["receiver_email"]
 
-        send_email(sender, password, receiver, username, scenario=etype)
+        send_email(
+            sender, password, receiver, username,
+            scenario=etype, subject=subject
+        )
         logger.info(f"Email sent to {receiver} (scenario - {etype})")
     except Exception as ex:
         logger.exception(ex)
@@ -233,10 +247,15 @@ def terminate_session(id: int):
         The session ID for the session to be terminated.
     """
     try:
+        if not id:
+            return
+        
         obj = subprocess.run(
             f"tsdiscon {id}", stderr=subprocess.PIPE, text=True
         )
-        logger.info(f"Session {id} terminated")
+        message = f"Session {id} terminated"
+        logger.info(message)
+        print(message)
         if obj.stderr:
             logger.debug(f"terminate_session: {obj.stderr}")
     except Exception as ex:
@@ -355,7 +374,7 @@ def receive_messages(conn: socket.socket):
     try:
         message = conn.recv(1024)
         clientname, greetings = pickle.loads(message)
-        print("I am:", clientname)
+        print("watch_screen client:", clientname)
         if clientname and greetings == "hi":
             conn.send(str.encode("go on"))
         while True:
@@ -367,46 +386,7 @@ def receive_messages(conn: socket.socket):
             if clientname not in login.keys():
                 # print("You got me!")
                 continue
-                # Get event logs to find if clientname has logged in.
-                # logons = get_login_events()
-                # print("logons:", logons)
-                # if clientname not in logons.keys():
-                    # Client has not logged in
-                    # continue
-                # Multiple logs are made for the logged in user. After
-                # logging the name of the client PC which is remotely
-                # connected to the server this watchdog is running on
-                # and the username it logged in as, there is also
-                # another log for the same username but this time with
-                # the server name. So if both logs contain the same
-                # username, then the logged in user is confirmed. There
-                # might be conflicts, I believe, if multiple client
-                # machines log in at the same time with different
-                # usernames. The way the logs are being gathered will
-                # cause one of the usernames to be confirmed and the
-                # other's session would be terminated. The situation
-                # has been handled and a special email will be sent so
-                # that the user whose session was terminated can log in
-                # again and the previous login won't be counted as a
-                # violation.
-                # if logons[hostname][1] == logons[clientname][1]:
-                    # Add user to login dictionary
-                    # login[clientname] = logons[clientname][1]
-                # else:
-                #     # Different usernames in event log.
-                #     logger.error(
-                #         "Username logged by host machine does not match "
-                #         "username of recent login by remote client. "
-                #         "Terminating session."
-                #     )
-                #     # Terminate session"
-                #     session_id = get_session_id(logons[clientname][1])
-                #     if session_id:
-                #         # User is logged in.
-                #         terminate_session(session_id)
-                #         # Email
-                #         alert(username=logons[clientname][1], etype=3)
-                #     continue
+                
             if message != "pass":
                 # When the client has stopped running anti-screenshot
                 # program.
@@ -417,7 +397,10 @@ def receive_messages(conn: socket.socket):
                     # Email
                     alert(username=username, etype=2)
                 # Remove client from login dictionary.
-                del login[clientname]
+                try:
+                    del login[clientname]
+                except KeyError:
+                    pass
     except (ConnectionResetError, socket.timeout):
         try:
             username = login[clientname]
@@ -487,16 +470,19 @@ def get_pc_name(username: str) -> str:
     """
     try:
         global login
-        if len(login) == 0:
+        logged_users = [name.lower() for name in login.values()]
+        if len(login) == 0 or username not in logged_users:
             logons = get_login_events()
             evt_users = [user[1].lower() for user in logons.values()]
             if username in evt_users and len(evt_users) == 3:
                 tname = list(logons.keys())[2]
                 login[tname] = list(logons.values())[2][1]
+                print(f"{username} connected using {tname}")
                 return tname
             elif username in evt_users and len(evt_users) == 1:
                 tname = list(logons.keys())[0]
                 login[tname] = list(logons.values())[0][1]
+                print(f"{username} connected using {tname}")
                 return tname
         for pc_name, name in login.items():
             if name.lower() == username:
@@ -527,6 +513,20 @@ def main():
                         session_id = get_session_id(user_name)
                         terminate_session(session_id)
                         alert(user_name, 3)
+                        continue
+                    # Email alert for logged in user.
+                    # alert(
+                    #     user_name, etype=4,
+                    #     subject="Remote Desktop Connection"
+                    # )
+                else:
+                    logged_users = [name.lower() for name in login.values()]
+                    if user_name in logged_users:
+                        login = {key:val for key, val in login.items() \
+                            if val.lower() != user_name}
+                        message = f"{user_name} disconnected"
+                        logger.info(message)
+                        print(message)
             time.sleep(2)
     except Exception as ex:
         logger.exception(ex)

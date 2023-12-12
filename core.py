@@ -396,7 +396,8 @@ if __name__=="__main__":
         """
         Create "uninteractable" text label overlay.
 
-        Paramters:
+        Parameters
+        ----------
         message: str
             String to display as message over desktop.
         """
@@ -406,9 +407,9 @@ if __name__=="__main__":
             fg="orange", bg="white"
         )
         label.master.overrideredirect(True)
-        # get width of screen
-        width, _ = pyautogui.size()
-        label.master.geometry(f"+{width//16}+0")
+        # Get width and height of screen.
+        width, height = pyautogui.size()
+        label.master.geometry(f"+{width-width//3}+{height-height//16}")
         label.master.lift()
         label.master.wm_attributes("-topmost", True)
         label.master.wm_attributes("-disabled", True)

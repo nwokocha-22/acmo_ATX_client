@@ -133,13 +133,13 @@ class ActivityMonitor():
         """Checks for policy violation.
 
         Checks if the size of the copied file is more than five hundred
-        Kilobytes. If so, invokes a disciplinary action, fires an email
-        to the admin. Else, increment the _copied_content_size.
+        bytes. If so, invokes a disciplinary action, fires an email to
+        the admin. Else, increment the _copied_content_size.
     
         Parameters
         ----------
         file_size: int
-            The size of the copied file/content in kilobytes.
+            The size of the copied file/content in bytes.
         file:  Optional[str, bytes]
             Content of the copied file (can be either string or bytes).
         file_type: str
@@ -152,21 +152,21 @@ class ActivityMonitor():
 
         if file_type == "text":
             # add the copied file to previous copied content
-            file_size += self._copied_content_size
-            file += self._copied_content
+            tfile_size = file_size + self._copied_content_size
+            tfile = self._copied_content + "\n" + file
 
             # check if the copied file size is greater than content
-            # limit (default=500KB)
-            limit_exceeded_1hr = file_size >= self._copied_content_limit
-            limit_exceeded_24hr = file_size + self._copied_content_size_24hr \
+            # limit (default=500 B)
+            limit_exceeded_1hr = tfile_size >= self._copied_content_limit
+            limit_exceeded_24hr = tfile_size + self._copied_content_size_24hr\
                                   >= self._copied_content_limit_24hrs
            
             # If this is the first time user is copying content
-            # and the content size exceeds the limit of 500KB,
+            # and the content size exceeds the limit of 500 B,
             # invoke the disciplinary action.
             if not self._time_last_checked:
                 if limit_exceeded_1hr:
-                    self.invokeDisciplinaryAction(file_size, file, file_type)
+                    self.invokeDisciplinaryAction(tfile_size, tfile, file_type)
                 else:
                     self._time_last_checked = time.time()
                     self.update_copied_content(file, file_size)
@@ -181,13 +181,13 @@ class ActivityMonitor():
                 # and the copied file size exceeds the 1hour limit,
                 # invoke the disciplinary action.
                 if interval <= 1 and limit_exceeded_1hr:
-                    self.invokeDisciplinaryAction(file_size, file, file_type)
+                    self.invokeDisciplinaryAction(tfile_size, tfile, file_type)
                 
                 # Else if the time passed since the previous copy is
                 # less than 24hrs and the copied file size exceeds the
-                # 24hrs limit (1500kb), invoke disciplinary action
+                # 24hrs limit (1500 B), invoke disciplinary action
                 elif (interval > 1 and interval < 24) and limit_exceeded_24hr:
-                    self.invokeDisciplinaryAction(file_size, file, file_type)
+                    self.invokeDisciplinaryAction(tfile_size, tfile, file_type)
                 else:
                     self.update_copied_content(
                         content=file, size=file_size, level=0
@@ -231,7 +231,7 @@ class ActivityMonitor():
         if level == 0:
             # everytime content is copied
             self._copied_content_size += size
-            self._copied_content += "\n" + content
+            self._copied_content += "\n"+content
 
             self.tx.update_params(
                 content_size_1hr=self._copied_content_size,

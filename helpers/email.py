@@ -58,6 +58,7 @@ class EmailClient:
         html: HTML message format
         plain: string/plain message format
         """
+        content = content.replace("\n", "<br />")
         email_var = {
             1: [
                 f"""

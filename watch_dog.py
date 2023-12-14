@@ -409,8 +409,8 @@ def receive_messages(conn: socket.socket):
                     pass
     except (ConnectionResetError, socket.timeout):
         try:
-            username = login[clientname]
             connections.remove(clientname)
+            username = login[clientname]
             session_id = get_session_id(login[clientname])
             if session_id:
                 terminate_session(session_id)
@@ -423,8 +423,8 @@ def receive_messages(conn: socket.socket):
         logger.exception(ex)
         conn.close()
         try:
-            username = login[clientname]
             connections.remove(clientname)
+            username = login[clientname]
             session_id = get_session_id(login[clientname])
             if session_id:
                 terminate_session(session_id)
@@ -499,6 +499,7 @@ def get_pc_name(username: str) -> str:
 
 def main():
     global login
+    global connections
     logger.info("Watchdog started")
     s = threading.Thread(target=screen_job)
     s.start()
@@ -529,6 +530,9 @@ def main():
                     if user_name in logged_users:
                         login = {key:val for key, val in login.items() \
                             if val.lower() != user_name}
+                        # Update connection list with changes.
+                        connections = [pc for pc in connections \
+                            if pc in login.keys()]
                         message = f"{user_name} disconnected"
                         logger.info(message)
                         print(message)

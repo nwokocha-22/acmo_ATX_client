@@ -16,7 +16,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import psutil
-import pandas as pd
 import win32evtlog
 import win32evtlogutil
 
@@ -293,14 +292,16 @@ def get_session_id(username: str) -> int:
     return id
 
 # Get non admin users.
-def user_list() -> pd.DataFrame:
+def user_list() -> dict:
     """
     Get the list of non admin users.
 
     Returns
     -------
-    pd.Dataframe
-        Data frame containing data about all users who aren't admin.
+    dict
+        Dictionary of users who aren't admin as key and whether they
+        are active or disconnected as values.
+        e.g. {'user1': 'Disconnected'}
     """
     obj = subprocess.run(
         "query user", stdout=subprocess.PIPE,
@@ -311,9 +312,14 @@ def user_list() -> pd.DataFrame:
         logger.debug(f"user_list: {obj.stderr}")
     data = obj.stdout.split("\n")[1:-1]
     data = [line.split() for line in data]
-    # Create a pandas data frame with the response.
-    df = pd.DataFrame(data=data, columns=obj.stdout.split("\n")[0].split())
-    users = df[df.USERNAME != "administrator"]
+    # Create a dictionary to store the state of users
+    users = {}
+    for i in data:
+        if "administrator" not in i:
+            if "Active" in i:
+                users[i[0]] = "Active"
+            elif "Disc" in i:
+                users[i[0]] = "Disconnected"
     return users
 
 def get_login_events() -> dict:
@@ -501,9 +507,8 @@ def main():
         while True:
             # Get all non admin users.
             users = user_list()
-            for i in range(len(users)):
-                user_name = users.iloc[i, 0]
-                if users.iloc[i, 3] == "Active":
+            for user_name in users.keys():
+                if users[user_name] == "Active":
                     find_activity_monitor_proc("main_client.exe", user_name)
                     # Get PC name for client that logged on as
                     # user_name.
